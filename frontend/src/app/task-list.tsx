@@ -26,7 +26,9 @@ export const TaskList = () => {
 
   return (
     <div>
-      <button onClick={handleAddTask}>Adicionar</button>
+      <button className="cursor-pointer" onClick={handleAddTask}>
+        Adicionar
+      </button>
       <ul>
         {tasks.map((task) => (
           <li key={task.id}>
