@@ -13,13 +13,15 @@ export const getOne = (req: Request, res: Response) => {
 }
 
 
-export const create = (req:Request, res:Response) =>{
-    const {data} = req.body
-    if(!data) return res.sendStatus(400).json({message: "Data is required"});
-    
-    const task = taskService.create(data);
-    res.status(201).json(task);
-}
+export const create = async (req: Request, res: Response) => {
+  try {
+    const task = await taskService.create(req.body);
+    return res.status(201).json(task); // return evita continuar
+  } catch (err) {
+    return res.status(500).json({ error: err}); // return aqui também
+  }
+};
+
 
 export const update =(req:Request, res:Response) => {
     const {id, ...data} = req.body
@@ -32,9 +34,12 @@ export const update =(req:Request, res:Response) => {
 
 export const remove = (req: Request, res:Response) => {
     const {id} = req.params
+    try{
     const success = taskService.remove(id);
-    if(!success) return res.sendStatus(404).json({message: "Task not found"});
-    res.sendStatus(204);
+res.sendStatus(204);
+    }catch{
+    return res.sendStatus(404).json({message: "Task not found"});
+    }
 }
 
 export const taskController = {

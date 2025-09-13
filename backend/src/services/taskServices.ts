@@ -1,4 +1,7 @@
 import { v4 as uuidv4 } from "uuid";
+
+
+
 import type task = require("../models/task");
 
 
@@ -8,15 +11,20 @@ export function getAll():task.Task[] {
     return tasks;
 };
 
-export function getOne(id: string):task.Task  {
+export function getOne(id: string): task.Task {
     const task = tasks.find((task) => task.id === id);
-    return task || null;
+    if (!task) {
+        throw new Error("Task not found");
+    }
+    return task;
 }
 
 export function create(data: task.Task) {
+
+    const id: string = uuidv4() ?? "";
+    const allData = { ...data, id };
     const task: task.Task = {
-        id: uuidv4(),
-        ...data
+        ...allData
     };
 
     tasks.push(task);
