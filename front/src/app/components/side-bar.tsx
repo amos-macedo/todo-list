@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Filter,
   Settings,
@@ -73,7 +72,12 @@ export const SideBar = ({
       </div>
 
       <AccordionAnimatedItem
-        title={{ name: "Categorias", icon: <Settings size={16} /> }}
+        title={
+          <div className="flex items-center gap-2">
+            <Settings size={16} />
+            <div>Categorias</div>
+          </div>
+        }
         content={categoriesContent}
       />
     </div>
