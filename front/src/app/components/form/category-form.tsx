@@ -18,6 +18,7 @@ export const CategoryForm = ({
   const [category, setCategory] = useState<Category | null>(null);
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (!categoryId) return;
@@ -28,37 +29,48 @@ export const CategoryForm = ({
         setCategory(data);
         setName(data.name);
       } catch (err) {
-        console.error("Error to fetch category:", err);
+        console.error("Error fetching category:", err);
       }
     };
 
     fetchCategory();
   }, [categoryId]);
 
+  const validate = () => {
+    if (!name.trim()) {
+      setError("O nome da categoria é obrigatório.");
+      return false;
+    }
+    if (name.trim().length < 2) {
+      setError("O nome da categoria precisa ter pelo menos 2 caracteres.");
+      return false;
+    }
+
+    setError("");
+    return true;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validate()) return;
+
     setLoading(true);
 
     try {
       const categoryData: Omit<Category, "id"> = {
-        name,
+        name: name.trim(),
         userId: category?.userId || "123",
       };
 
-      let savedCategory: Category;
-      if (categoryId) {
-        savedCategory = await categoryApi.update(
-          categoryId,
-          categoryData as Category
-        );
-      } else {
-        savedCategory = await categoryApi.create(categoryData as Category);
-      }
+      const savedCategory = categoryId
+        ? await categoryApi.update(categoryId, categoryData as Category)
+        : await categoryApi.create(categoryData as Category);
 
       onCreated?.(savedCategory);
       onClose?.();
     } catch (err) {
-      console.error("Erro ao salvar category:", err);
+      console.error("Erro ao salvar categoria:", err);
     } finally {
       setLoading(false);
     }
@@ -76,14 +88,18 @@ export const CategoryForm = ({
         onClick={onClose}
       />
 
-      <input
-        type="text"
-        placeholder="Título"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        className="border rounded px-3 py-2"
-        required
-      />
+      <div className="flex flex-col gap-1">
+        <input
+          type="text"
+          placeholder="Nome da Categoria"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className={`border rounded px-3 py-2 ${
+            error ? "border-red-500" : ""
+          }`}
+        />
+        {error && <span className="text-red-500 text-sm">{error}</span>}
+      </div>
 
       <button
         type="submit"
@@ -93,8 +109,8 @@ export const CategoryForm = ({
         {loading
           ? "Salvando..."
           : categoryId
-          ? "Atualizar Tarefa"
-          : "Criar Tarefa"}
+          ? "Atualizar Categoria"
+          : "Criar Categoria"}
       </button>
     </form>
   );

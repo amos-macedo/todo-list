@@ -6,7 +6,7 @@ import { X } from "lucide-react";
 import categoryApi, { Category } from "@/api/category";
 
 type TaskFormProps = {
-  taskId?: string; // opcional para criação
+  taskId?: string; // opcional para edição
   onCreated?: (task: Task) => void;
   onClose?: () => void;
 };
@@ -19,6 +19,11 @@ export const TaskForm = ({ taskId, onCreated, onClose }: TaskFormProps) => {
   const [loading, setLoading] = useState(false);
 
   const [categories, setCategories] = useState<Category[]>([]);
+  const [errors, setErrors] = useState<{
+    title?: string;
+    description?: string;
+    category?: string;
+  }>({});
 
   const fetchCategories = async () => {
     try {
@@ -33,7 +38,7 @@ export const TaskForm = ({ taskId, onCreated, onClose }: TaskFormProps) => {
     fetchCategories();
   }, []);
 
-  // Busca a task do backend caso esteja editando
+  // Buscar task para edição
   useEffect(() => {
     if (!taskId) return;
 
@@ -43,7 +48,7 @@ export const TaskForm = ({ taskId, onCreated, onClose }: TaskFormProps) => {
         setTask(data);
         setTitle(data.title);
         setDescription(data.description || "");
-        setCategory(data.category || "Trabalho");
+        setCategory(data.category || "");
       } catch (err) {
         console.error("Erro ao buscar task:", err);
       }
@@ -52,28 +57,41 @@ export const TaskForm = ({ taskId, onCreated, onClose }: TaskFormProps) => {
     fetchTask();
   }, [taskId]);
 
+  const validate = () => {
+    const newErrors: typeof errors = {};
+
+    if (!title.trim()) newErrors.title = "Título é obrigatório.";
+    else if (title.trim().length < 3)
+      newErrors.title = "Título precisa ter pelo menos 3 caracteres.";
+
+    if (description.length > 200)
+      newErrors.description = "Descrição não pode passar de 200 caracteres.";
+
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validate()) return;
+
     setLoading(true);
 
     try {
       const taskData: Omit<Task, "id"> = {
-        title,
-        description,
+        title: title.trim(),
+        description: description.trim(),
         category,
         dueDate: task?.dueDate ? new Date(task.dueDate) : new Date(),
         status: task?.status || "PENDING",
-        // completed: task?.completed ?? false,
         userId: task?.userId || "123",
       };
 
-      let savedTask: Task;
-      if (taskId) {
-        // update: id na URL, não no body
-        savedTask = await taskApi.update(taskId, taskData as Task);
-      } else {
-        savedTask = await taskApi.create(taskData as Task);
-      }
+      const savedTask = taskId
+        ? await taskApi.update(taskId, taskData as Task)
+        : await taskApi.create(taskData as Task);
 
       onCreated?.(savedTask);
       onClose?.();
@@ -96,21 +114,34 @@ export const TaskForm = ({ taskId, onCreated, onClose }: TaskFormProps) => {
         onClick={onClose}
       />
 
-      <input
-        type="text"
-        placeholder="Título"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className="border rounded px-3 py-2"
-        required
-      />
+      <div className="flex flex-col gap-1">
+        <input
+          type="text"
+          placeholder="Título"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          className={`border rounded px-3 py-2 ${
+            errors.title ? "border-red-500" : ""
+          }`}
+        />
+        {errors.title && (
+          <span className="text-red-500 text-sm">{errors.title}</span>
+        )}
+      </div>
 
-      <textarea
-        placeholder="Descrição"
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        className="border rounded px-3 py-2"
-      />
+      <div className="flex flex-col gap-1">
+        <textarea
+          placeholder="Descrição"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          className={`border rounded px-3 py-2 ${
+            errors.description ? "border-red-500" : ""
+          }`}
+        />
+        {errors.description && (
+          <span className="text-red-500 text-sm">{errors.description}</span>
+        )}
+      </div>
 
       <select
         value={category}
