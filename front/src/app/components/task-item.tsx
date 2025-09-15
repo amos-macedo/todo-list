@@ -84,7 +84,7 @@ export const TaskItem = ({
             }
           />
 
-          <span className="flex items-center gap-2">
+          <span className="hidden md:flex items-center gap-2">
             <Calendar size={16} />
             <p>{dueDate && new Date(dueDate).toLocaleDateString("pt-BR")}</p>
           </span>

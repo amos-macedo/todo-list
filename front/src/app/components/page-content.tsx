@@ -118,7 +118,7 @@ export const PageContent = () => {
           }}
         />
 
-        <div className="flex-1 h-full mx-auto md:max-w-[60dvw] flex flex-col  gap-5 p-4 pt-10">
+        <div className="flex-1 h-full w-full mx-auto md:max-w-[60dvw] flex flex-col  gap-5 p-4 pt-10">
           <h2 className="text-2xl font-bold text-white">Tarefas</h2>
 
           <div className="flex w-full items-center gap-2 mb-4">
