@@ -10,4 +10,4 @@ router.post("/", categoryController.create);
 router.put("/:id", categoryController.update);
 router.delete("/:id", categoryController.remove);
 
-export const taskRouter = router
+export const categoryRouter = router
