@@ -1,7 +1,9 @@
-export interface Task {
-    id: string,
-    title: string,
-    description: string,
-    completed: boolean,
-    userId: string,
+ export interface Task {
+  id: string;
+  title: string;
+  category: string;
+  dueDate: Date;
+  status: string;
+  description: string;
+  userId: string
 }

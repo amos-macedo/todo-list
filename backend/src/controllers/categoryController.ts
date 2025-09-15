@@ -1,23 +1,26 @@
 import { Request, Response } from "express";
-import * as taskService from "../services/taskServices";
-import { Task } from "../models/task";
+import * as categoryServices from "../services/categoryServices";
+import { Category } from "../models/category";
+
 
 export const getAll = (req: Request, res: Response)=> {
-  res.json(taskService.getAll());
+  res.json(categoryServices.getAll());
 }
+
 
 export const getOne = (req: Request, res: Response) => {
     const {id} = req.params
-    const task = taskService.getOne(id);
-    if(!task) return res.sendStatus(404).json({message: "Task not found"});
-    res.json(task);
+   const category = categoryServices.getOne(id);
+if (!category) return res.status(404).json({ message: "Category not found" });
+res.json(category);
+
 }
 
 
 export const create = async (req: Request, res: Response) => {
   try {
-    const task = await taskService.create(req.body);
-    return res.status(201).json(task); // return evita continuar
+    const category = await categoryServices.create(req.body);
+    return res.status(201).json(category); // return evita continuar
   } catch (err) {
     return res.status(500).json({ error: err}); // return aqui também
   }
@@ -26,22 +29,21 @@ export const create = async (req: Request, res: Response) => {
 
 export const update = (req: Request, res: Response) => {
   const { id } = req.params;          // pega id da URL
-  const data: Partial<Task> = req.body;
+  const data: Partial<Category> = req.body;
 
   if (!id || Object.keys(data).length === 0) {
     return res.status(400).json({ message: "ID and data are required" });
   }
 
-  const task = taskService.update(id, data);
-  if (!task) return res.status(404).json({ message: "Task not found" });
+  const category = categoryServices.update(id, data);
+  if (!category) return res.status(404).json({ message: "Categoryk not found" });
 
-  res.json(task);
+  res.json(category);
 };
-
 
 export const remove = (req: Request, res: Response) => {
   const { id } = req.params;
-  const removed = taskService.remove(id);
+  const removed = categoryServices.remove(id);
 
   if (!removed) {
     return res.status(404).json({ message: "Category not found" });
@@ -51,7 +53,7 @@ export const remove = (req: Request, res: Response) => {
 };
 
 
-export const taskController = {
+export const categoryController = {
     getAll,
     getOne,
     create,

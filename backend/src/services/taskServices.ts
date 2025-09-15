@@ -32,21 +32,23 @@ export function create(data: task.Task) {
     
 };
 
-export function update(id: string, data: task.Task) {
-    const task = tasks.findIndex((task) => task.id === id)
-    if(!task) return null;
+export function update(id: string, data: Partial<task.Task>) {
+  const index = tasks.findIndex((t) => t.id === id);
+  if (index === -1) return null;
 
-    tasks[task] = {
-        ...tasks[task],
-        ...data
-    };
-    return tasks[task];
-};
+  tasks[index] = {
+    ...tasks[index],
+    ...data,
+  };
+
+  return tasks[index];
+}
 
 export function remove (id: string) {
-    const task = tasks.findIndex((task) => task.id === id)
-    if(!task) return null;
+  const index = tasks.findIndex((task) => task.id === id);
+  if (index === -1) return null;
 
-    tasks.splice(task, 1);
-    return tasks;
+  const deleted = tasks[index];
+  tasks.splice(index, 1);
+  return deleted;
 }   
