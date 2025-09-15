@@ -4,17 +4,15 @@ import React, { useEffect, useState } from "react";
 import { Pencil, PlusCircle, Settings, Square, Trash } from "lucide-react";
 import { AccordionAnimatedItem } from "./accordion-item";
 import categoryApi, { Category } from "@/api/category";
-import { div } from "framer-motion/client";
 import { CategoryForm } from "./form/category-form";
 
 type CategoryListProps = {
-  handleSetCategory: (cat: string) => void;
+  handleSetCategory?: (cat: string) => void;
 };
 
 export const CategoryList = ({ handleSetCategory }: CategoryListProps) => {
   const [selectedCategory, setSelectedCategory] = useState("");
   const [formOpen, setFormOpen] = useState(false);
-
   const [categories, setCategories] = useState<Category[]>([]);
 
   const fetchCategories = async () => {
@@ -30,15 +28,11 @@ export const CategoryList = ({ handleSetCategory }: CategoryListProps) => {
     fetchCategories();
   }, []);
 
-  const handleOpenForm = () => {
-    setFormOpen(true);
-  };
-
+  const handleOpenForm = () => setFormOpen(true);
   const handleEditCategory = (id: string) => {
     setSelectedCategory(id);
     setFormOpen(true);
   };
-
   const handleDeleteCategory = async (id: string) => {
     try {
       await categoryApi.remove(id);
@@ -50,10 +44,12 @@ export const CategoryList = ({ handleSetCategory }: CategoryListProps) => {
 
   const categoriesContent = categories.map((cat) => (
     <button
-      className={`group flex items-center justify-between py-1.5 w-full px-3 rounded-md gap-2 transition-colors duration-200 text-[#BDC1CAFF] hover:bg-[#0C0A42FF]/40 ${
-        selectedCategory === cat.id && "text-white bg-[#0C0A42FF]"
-      }`}
       key={cat.id}
+      className={`group flex items-center justify-between py-2 w-full px-3 rounded-md gap-2 transition-colors duration-200 text-sm ${
+        selectedCategory === cat.id
+          ? "text-white bg-[#0C0A42]"
+          : "text-[#BDC1CA] hover:bg-[#0C0A42]/40"
+      }`}
       onClick={() => {
         setSelectedCategory(cat.id);
         handleSetCategory?.(cat.id);
@@ -63,14 +59,14 @@ export const CategoryList = ({ handleSetCategory }: CategoryListProps) => {
         <Square size={10} />
         {cat.name}
       </div>
-      <span className="flex invisible items-center gap-3 group-hover:visible">
+      <span className="flex opacity-0 items-center gap-3 group-hover:opacity-100 transition">
         <Pencil
-          className="cursor-pointer"
+          className="cursor-pointer hover:text-blue-400"
           onClick={() => handleEditCategory(cat.id)}
           size={14}
         />
         <Trash
-          className="cursor-pointer"
+          className="cursor-pointer hover:text-red-400"
           onClick={() => handleDeleteCategory(cat.id)}
           size={14}
         />
@@ -79,28 +75,27 @@ export const CategoryList = ({ handleSetCategory }: CategoryListProps) => {
   ));
 
   return (
-    <div>
-      <div className="h-full border-r border-[#1E2128FF] text-sm flex flex-col items-between">
-        <div className="gap-4 flex flex-col items-start">
-          <AccordionAnimatedItem
-            title={
-              <div className="flex items-center gap-2">
-                <Settings size={16} />
-                <div>Categorias</div>
-              </div>
-            }
-            content={categoriesContent}
-          />
-        </div>
-      </div>
+    <div className="flex flex-col justify-between flex-1 h-full relative bg-red-600">
+      <AccordionAnimatedItem
+        title={
+          <div className="flex items-center gap-2">
+            <Settings size={16} />
+            <span>Categorias</span>
+          </div>
+        }
+        content={categoriesContent}
+      />
 
-      <button
-        onClick={handleOpenForm}
-        className="flex absolute bottom-10 items-center gap-3 px-2 py-2 rounded-md   bg-[#262A33FF] hover:bg-[#4E5668FF]"
-      >
-        <PlusCircle size={16} />
-        Adicionar categoria
-      </button>
+      {/* Botão fixo embaixo, desktop e mobile */}
+      <div className="absolute bottom-0 left-0 w-full mt-4">
+        <button
+          onClick={handleOpenForm}
+          className="flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-[#262A33] hover:bg-[#4E5668] transition w-full"
+        >
+          <PlusCircle size={16} />
+          <span className="text-sm">Adicionar categoria</span>
+        </button>
+      </div>
 
       {formOpen && (
         <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black/70 z-50">
