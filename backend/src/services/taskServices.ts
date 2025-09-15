@@ -7,9 +7,33 @@ import type task = require("../models/task");
 
 let tasks: task.Task[] = [];   
 
-export function getAll():task.Task[] {
-    return tasks;
-};
+interface TaskFilters {
+  category?: string;
+  status?: string;
+  search?: string;
+}
+export function getAll(filter?: TaskFilters): task.Task[] {
+  let filteredTasks = [...tasks];
+
+  if (filter?.search !== undefined) {
+    filteredTasks = filteredTasks.filter((task) => task.title.toLowerCase().includes((filter.search as string).toLowerCase()));
+  }
+  
+  if(filter?.category === ""){
+    filteredTasks = filteredTasks.filter((task) => task.category === "");
+  } else{
+    if(filter?.category && filter.category !== "All"){
+      filteredTasks = filteredTasks.filter((task) => task.category === filter.category);
+    }
+  }
+
+  if (filter?.status && filter.status !== "All") {
+    filteredTasks = filteredTasks.filter((task) => task.status === filter.status);
+  }
+
+  return filteredTasks;
+}
+
 
 export function getOne(id: string): task.Task {
     const task = tasks.find((task) => task.id === id);

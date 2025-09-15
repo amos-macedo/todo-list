@@ -3,7 +3,16 @@ import * as taskService from "../services/taskServices";
 import { Task } from "../models/task";
 
 export const getAll = (req: Request, res: Response)=> {
-  res.json(taskService.getAll());
+
+  try{
+    const {category, status, search} = req.query;
+    const tasks = taskService.getAll({category: category as string, status: status as string, search: search as string});
+
+    res.json(tasks);
+  } catch (err) {
+    return res.status(500).json({ error: "Error fetching tasks" });
+  }
+
 }
 
 export const getOne = (req: Request, res: Response) => {
@@ -44,7 +53,7 @@ export const remove = (req: Request, res: Response) => {
   const removed = taskService.remove(id);
 
   if (!removed) {
-    return res.status(404).json({ message: "Category not found" });
+    return res.status(404).json({ message: "Task not found" });
   }
 
   return res.sendStatus(204);
