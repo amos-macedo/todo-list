@@ -87,7 +87,7 @@ export const TaskForm = ({ taskId, onCreated, onClose }: TaskFormProps) => {
   return (
     <form
       onSubmit={handleSubmit}
-      className="flex flex-col gap-3 relative max-w-md w-full p-6 rounded-md border border-[#1E2128FF]"
+      className="flex flex-col bg-black gap-3 relative max-w-md w-full p-6 rounded-md border border-[#1E2128FF]"
     >
       <X
         color="white"

@@ -18,9 +18,9 @@ import { CategoryForm } from "./form/category-form";
 import { AccordionAnimatedItem } from "./accordion-item";
 
 const mockFilters = [
-  { name: "Todos", icon: House },
-  { name: "Concluídos", icon: CheckCircle },
-  { name: "Pendentes", icon: Clock },
+  { name: "Todos", value: "All", icon: House },
+  { name: "Concluídos", value: "COMPLETED", icon: CheckCircle },
+  { name: "Pendentes", value: "PENDING", icon: Clock },
 ];
 
 type SidebarProps = {
@@ -28,6 +28,7 @@ type SidebarProps = {
   handleSetCategory?: (category: string) => void;
   isOpen: boolean;
   onClose: () => void;
+  onCreated?: () => void;
 };
 
 export const SideBar = ({
@@ -35,9 +36,10 @@ export const SideBar = ({
   handleSetCategory,
   isOpen,
   onClose,
+  onCreated,
 }: SidebarProps) => {
-  const [selectedFilter, setSelectedFilter] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedFilter, setSelectedFilter] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState("All");
   const [categories, setCategories] = useState<Category[]>([]);
   const [formOpen, setFormOpen] = useState(false);
 
@@ -68,7 +70,10 @@ export const SideBar = ({
     }
   };
 
-  const categoriesContent = categories.map((cat) => (
+  const categoriesContent = [
+    ...categories,
+    { id: "", name: "Sem categoria" },
+  ].map((cat) => (
     <button
       key={cat.id}
       className={`group flex items-center justify-between py-2 w-full px-3 rounded-md gap-2 transition-colors duration-200 text-sm ${
@@ -85,18 +90,20 @@ export const SideBar = ({
         <Square size={10} />
         {cat.name}
       </div>
-      <span className="flex opacity-0 items-center gap-3 group-hover:opacity-100 transition">
-        <Pencil
-          className="cursor-pointer hover:text-blue-400"
-          onClick={() => handleOpenForm(cat.id)}
-          size={14}
-        />
-        <Trash
-          className="cursor-pointer hover:text-red-400"
-          onClick={() => handleDeleteCategory(cat.id)}
-          size={14}
-        />
-      </span>
+      {cat.id !== "" && (
+        <span className="flex opacity-0 items-center gap-3 group-hover:opacity-100 transition">
+          <Pencil
+            className="cursor-pointer hover:text-blue-400"
+            onClick={() => handleOpenForm(cat.id)}
+            size={14}
+          />
+          <Trash
+            className="cursor-pointer hover:text-red-400"
+            onClick={() => handleDeleteCategory(cat.id)}
+            size={14}
+          />
+        </span>
+      )}
     </button>
   ));
 
@@ -111,11 +118,11 @@ export const SideBar = ({
           <button
             key={filter.name}
             className={`flex items-center w-full py-1.5 px-3 rounded-lg gap-2 transition-colors duration-200 text-[#BDC1CAFF] hover:bg-[#0C0A42FF]/40 ${
-              selectedFilter === filter.name && "text-white bg-[#0C0A42FF]"
+              selectedFilter === filter.value && "text-white bg-[#0C0A42FF]"
             }`}
             onClick={() => {
-              setSelectedFilter(filter.name);
-              handleSetFilter?.(filter.name);
+              setSelectedFilter(filter.value);
+              handleSetFilter?.(filter.value);
             }}
           >
             <filter.icon size={14} />
@@ -128,10 +135,11 @@ export const SideBar = ({
 
   return (
     <>
-      <div className="hidden md:flex h-full w-56 flex-col justify-between border-r border-[#1E2128FF] p-6  text-sm">
+      <div className="hidden md:flex h-full w-56 flex-col justify-between border-r border-[#1E2128FF] p-5  text-sm">
         <div className="flex flex-col gap-4">{Filters}</div>
         <div className="flex flex-col flex-1 mt-4 relative">
           <AccordionAnimatedItem
+            openByDefault={true}
             title={
               <div className="flex items-center gap-2">
                 <Settings size={16} />
@@ -139,6 +147,10 @@ export const SideBar = ({
               </div>
             }
             content={categoriesContent}
+            handleOpen={() => {
+              setSelectedCategory("All");
+              handleSetCategory?.("All");
+            }}
           />
           <div className="absolute bottom-20 left-0 w-full mt-4">
             <button
@@ -178,6 +190,7 @@ export const SideBar = ({
                 </button>
                 {Filters}
                 <AccordionAnimatedItem
+                  openByDefault={true}
                   title={
                     <div className="flex items-center gap-2">
                       <Settings size={16} />
@@ -208,6 +221,7 @@ export const SideBar = ({
             onCreated={() => {
               fetchCategories();
               setFormOpen(false);
+              onCreated?.();
             }}
             onClose={() => setFormOpen(false)}
           />

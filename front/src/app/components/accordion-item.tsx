@@ -7,14 +7,18 @@ interface AccordionItemProps {
   title: React.ReactNode;
   content: React.ReactNode;
   closeOnSelect?: boolean;
+  openByDefault?: boolean;
+  handleOpen?: () => void;
 }
 
 export const AccordionAnimatedItem = ({
   title,
   content,
   closeOnSelect = false,
+  openByDefault = false,
+  handleOpen,
 }: AccordionItemProps) => {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(openByDefault);
 
   const handleSelect = () => {
     if (closeOnSelect) {
@@ -25,8 +29,11 @@ export const AccordionAnimatedItem = ({
   return (
     <div className="w-full relative">
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="text-md font-bold w-full flex gap-2 items-center justify-between cursor-pointer"
+        onClick={() => {
+          handleOpen?.();
+          setIsOpen(!isOpen);
+        }}
+        className="text-md font-normal w-full flex gap-2 items-center justify-between cursor-pointer"
       >
         <span className="flex items-center gap-2">{title}</span>
         <motion.div
@@ -44,7 +51,7 @@ export const AccordionAnimatedItem = ({
             animate={{ opacity: 1, scaleY: 1 }}
             exit={{ opacity: 0, scaleY: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 mt-1 w-44 origin-top rounded-md shadow-lg z-50"
+            className="absolute top-full w-full flex flex-col gap-1 left-0 mt-1  origin-top rounded-md shadow-lg z-50"
             onClick={handleSelect}
           >
             {content}

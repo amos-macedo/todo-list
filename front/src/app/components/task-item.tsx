@@ -1,5 +1,6 @@
 import { Calendar, Pencil, Trash } from "lucide-react";
 import { AccordionAnimatedItem } from "./accordion-item";
+import { Status } from "@/api/task";
 
 type TaskItemProps = {
   id: string;
@@ -12,7 +13,7 @@ type TaskItemProps = {
   handleOnCheck: (id: string) => void;
   handleOnEditTask: (id: string) => void;
   handleOnDeleteTask: (id: string) => void;
-  handleOnToggleStatus: (id: string, newStatus: string) => void;
+  handleOnToggleStatus: (id: string, newStatus: Status) => void;
 };
 
 const status_map: Record<string, { color: string; name: string }> = {
@@ -53,25 +54,28 @@ export const TaskItem = ({
       {/* Categoria + Status + Data */}
       <div className="flex items-center gap-5">
         <div className="flex items-center gap-2">
-          <p className="p-1 rounded-md bg-[#323842FF]">{category}</p>
+          <p className="p-1 w-full rounded-md bg-[#323842FF]">
+            {category || "Sem categoria"}
+          </p>
 
           {/* 🔽 Dropdown customizado pro status */}
           <AccordionAnimatedItem
             closeOnSelect
             title={
               <p
-                className={`py-1 px-2 rounded-md ${status_map[status]?.color}`}
+                className={`w-full text-sm  py-0.5 px-2 rounded-md ${status_map[status]?.color} truncate`}
+                title={status_map[status]?.name} // mostra tooltip ao passar o mouse
               >
                 {status_map[status]?.name}
               </p>
             }
             content={
-              <div className="flex flex-col rounded-md bg-[#2A2E37]">
+              <div className="flex w-full flex-nowrap text-sm flex-col rounded-md bg-[#2A2E37]">
                 {Object.entries(status_map).map(([key, { color, name }]) => (
                   <button
                     key={key}
-                    onClick={() => handleOnToggleStatus(id, key)}
-                    className={`w-full text-left px-3 py-2 rounded-md ${color} text-white`}
+                    onClick={() => handleOnToggleStatus(id, key as Status)}
+                    className={`w-full text-left px-2 py-1 rounded-md ${color} text-white`}
                   >
                     {name}
                   </button>

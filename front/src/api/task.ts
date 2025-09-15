@@ -13,9 +13,18 @@ export type Status = "PENDING" | "IN_PROGRESS" | "COMPLETED";
   userId: string
 }
 
+export interface TaskFilters {
+  category?: string;
+  status?: string;
+  search?: string;
+}
+
 // Buscar todas as tasks
- const getAll = async (): Promise<Task[]> => {
-  const response = await api.get<Task[]>("/tasks");
+ const getAll = async ( filter?: TaskFilters): Promise<Task[]> => {
+  const response = await api.get<Task[]>("/tasks", {
+    params: filter,
+  });
+
   return response.data;
 };
 

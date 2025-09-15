@@ -1,4 +1,3 @@
-// src/services/tasks.ts
 import { api } from "./api";
 
 export type Status = "PENDING" | "IN_PROGRESS" | "COMPLETED";
@@ -9,7 +8,6 @@ export type Status = "PENDING" | "IN_PROGRESS" | "COMPLETED";
   userId: string;
 }
 
-// Buscar todas as tasks
  const getAll = async (): Promise<Category[]> => {
   const response = await api.get<Category[]>("/categories");
   return response.data;
@@ -21,18 +19,17 @@ const getOne = async (id: string): Promise<Category> => {
   return response.data;
 }
 
-// Criar task
- const create = async (task: Category): Promise<Category> => {
-  if(!task.name) throw new Error('name is required');
-  const response = await api.post<Category>("/categories", { ...task });
+ const create = async (category: Category): Promise<Category> => {
+  if(!category.name) throw new Error('name is required');
+  const response = await api.post<Category>("/categories", { ...category });
   return response.data;
 };
 
-// Atualizar task
-const update = async (id: string, task: Category): Promise<Category> => {
-  if (!id || !task.name) throw new Error("Error updating category");
 
-  const { id: _, ...rest } = task;
+const update = async (id: string, category: Category): Promise<Category> => {
+  if (!id || !category.name) throw new Error("Error updating category");
+
+  const { id: _, ...rest } = category;
 
   const response = await api.put<Category>(`/categories/${id}`, {
     ...rest,
@@ -42,7 +39,6 @@ const update = async (id: string, task: Category): Promise<Category> => {
 };
 
 
-// Deletar task
  const remove = async (id: string): Promise<void> => {
   await api.delete(`/categories/${id}`);
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import taskApi, { Status, Task } from "@/api/task";
+import taskApi, { Status, Task, TaskFilters } from "@/api/task";
 import { TaskItem } from "./task-item";
 import { TaskForm } from "./form/task-form";
 import { SideBar } from "./side-bar";
@@ -15,6 +15,20 @@ export const PageContent = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
+  const [filters, setFilters] = useState<TaskFilters>({
+    search: "",
+  });
+
+  const [searchInput, setSearchInput] = useState("");
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setFilters((prev) => ({ ...prev, search: searchInput }));
+    }, 300);
+
+    return () => clearTimeout(timeout);
+  }, [searchInput]);
+
   const fetchCategories = async () => {
     try {
       const data = await categoryApi.getAll();
@@ -24,9 +38,13 @@ export const PageContent = () => {
     }
   };
 
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
   const fetchTasks = async () => {
     try {
-      const data = await taskApi.getAll();
+      const data = await taskApi.getAll(filters);
       setTasks(data);
     } catch (err) {
       console.error("Erro ao buscar tasks:", err);
@@ -34,9 +52,46 @@ export const PageContent = () => {
   };
 
   useEffect(() => {
-    fetchCategories();
     fetchTasks();
-  }, []);
+  }, [filters]);
+
+  const handleToggleTask = async (task: Task) => {
+    try {
+      const updated = await taskApi.update(task.id, {
+        ...task,
+        status: task.status === "COMPLETED" ? "PENDING" : "COMPLETED",
+      });
+      setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
+    } catch (err) {
+      console.error("Erro ao atualizar task:", err);
+    }
+  };
+
+  const handleDeleteTask = async (id: string) => {
+    try {
+      await taskApi.remove(id);
+      fetchTasks();
+      // setTasks((prev) => prev.filter((t) => t.id !== id));
+    } catch (err) {
+      console.error("Erro ao deletar task:", err);
+    }
+  };
+
+  const handleEditTask = (id: string) => {
+    setTaskId(id);
+    setOpenForm(true);
+  };
+
+  const handleOnToggleStatus = async (id: string, newStatus: Status) => {
+    const taskToUpdate = tasks.find((t) => t.id === id);
+    if (!taskToUpdate) return;
+
+    const updated = await taskApi.update(id, {
+      ...taskToUpdate,
+      status: newStatus,
+    });
+    setTasks(tasks.map((t) => (t.id === id ? updated : t)));
+  };
 
   return (
     <div className="w-full h-dvh mx-auto bg-black text-white">
@@ -52,39 +107,86 @@ export const PageContent = () => {
         <SideBar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
+          handleSetFilter={(status) =>
+            setFilters((prev) => ({ ...prev, status }))
+          }
+          handleSetCategory={(category) =>
+            setFilters((prev) => ({ ...prev, category }))
+          }
+          onCreated={() => {
+            fetchTasks();
+            fetchCategories();
+          }}
         />
 
-        <div className="flex-1 h-full mx-auto md:max-w-[60dvw] flex flex-col gap-2 p-4">
-          {tasks.map((task) => {
-            const category =
-              categories && categories.find((c) => c.id === task.category);
+        <div className="flex-1 h-full mx-auto md:max-w-[60dvw] flex flex-col  gap-5 p-4">
+          <h2 className="text-2xl font-bold text-white">Tarefas</h2>
 
-            return (
-              <TaskItem
-                key={task.id}
-                id={task.id}
-                title={task.title}
-                description={task.description}
-                category={category?.name || ""}
-                status={task.status}
-                dueDate={task.dueDate}
-                checked={task.status === "COMPLETED"}
-                handleOnCheck={() => {}}
-                handleOnEditTask={() => {}}
-                handleOnDeleteTask={() => {}}
-                handleOnToggleStatus={() => {}}
-              />
-            );
-          })}
+          <input
+            type="text"
+            placeholder="Buscar tarefa"
+            className="w-full p-2 rounded-md bg-[#262A33FF] text-white"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+          />
+
+          {tasks.length === 0 ? (
+            <div className="flex flex-col items-center justify-center  mb-10 md:mb-0 h-full  text-center gap-4 text-gray-400">
+              <h2 className="text-2xl font-bold text-white">
+                Nenhuma tarefa por aqui!
+              </h2>
+              <p className="text-sm max-w-xs">
+                Você ainda não adicionou nenhuma task. Clique no botão{" "}
+                <span className="font-semibold text-blue-400">
+                  Adicionar Task
+                </span>{" "}
+                para começar a organizar suas tarefas.
+              </p>
+              <button
+                onClick={() => setOpenForm(true)}
+                className="mt-2 px-4 cursor-pointer py-2 bg-blue-500 hover:bg-blue-600 rounded-md text-white font-semibold"
+              >
+                Adicionar Task
+              </button>
+            </div>
+          ) : (
+            <div className="mt-10 flex flex-col gap-2">
+              {tasks.map((task) => {
+                const category = categories.find((c) => c.id === task.category);
+
+                return (
+                  <TaskItem
+                    key={task.id}
+                    id={task.id}
+                    title={task.title}
+                    description={task.description}
+                    category={category?.name || ""}
+                    status={task.status}
+                    dueDate={task.dueDate}
+                    checked={task.status === "COMPLETED"}
+                    handleOnCheck={() => handleToggleTask(task)}
+                    handleOnEditTask={() => handleEditTask(task.id)}
+                    handleOnDeleteTask={() => handleDeleteTask(task.id)}
+                    handleOnToggleStatus={(id, status) =>
+                      handleOnToggleStatus(id, status)
+                    }
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
       {openForm && (
-        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black/70 z-50">
+        <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-black/80 z-50">
           <TaskForm
             taskId={taskId}
             onClose={() => setOpenForm(false)}
-            onCreated={fetchTasks}
+            onCreated={() => {
+              fetchCategories();
+              fetchTasks();
+            }}
           />
         </div>
       )}
