@@ -44,7 +44,7 @@ export const AccordionAnimatedItem = ({
             animate={{ opacity: 1, scaleY: 1 }}
             exit={{ opacity: 0, scaleY: 0 }}
             transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 mt-1 w-44 origin-top rounded-md shadow-lg bg-[#2A2E37] z-50"
+            className="absolute top-full left-0 mt-1 w-44 origin-top rounded-md shadow-lg z-50"
             onClick={handleSelect}
           >
             {content}

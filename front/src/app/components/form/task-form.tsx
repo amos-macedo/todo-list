@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import taskApi, { Task } from "@/api/task";
 import { X } from "lucide-react";
+import categoryApi, { Category } from "@/api/category";
 
 type TaskFormProps = {
   taskId?: string; // opcional para criação
@@ -14,8 +15,23 @@ export const TaskForm = ({ taskId, onCreated, onClose }: TaskFormProps) => {
   const [task, setTask] = useState<Task | null>(null);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
-  const [category, setCategory] = useState("Trabalho");
+  const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  const fetchCategories = async () => {
+    try {
+      const data = await categoryApi.getAll();
+      setCategories(data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchCategories();
+  }, []);
 
   // Busca a task do backend caso esteja editando
   useEffect(() => {
@@ -99,11 +115,18 @@ export const TaskForm = ({ taskId, onCreated, onClose }: TaskFormProps) => {
       <select
         value={category}
         onChange={(e) => setCategory(e.target.value)}
-        className="border rounded px-3 py-2"
+        className="border bg-black rounded px-3 py-2"
       >
-        <option value="Trabalho">Trabalho</option>
-        <option value="Pessoal">Pessoal</option>
-        <option value="Estudos">Estudos</option>
+        <option value="">Sem categoria</option>
+        {categories.map((category) => (
+          <option
+            className="capitalize text-slate-300"
+            key={category.id}
+            value={category.id}
+          >
+            {category.name}
+          </option>
+        ))}
       </select>
 
       <button
