@@ -135,7 +135,7 @@ export const SideBar = ({
 
   return (
     <>
-      <div className="hidden md:flex h-full w-56 flex-col justify-between border-r border-[#1E2128FF] p-5  text-sm">
+      <div className="hidden md:flex h-full w-56 pt-10 flex-col justify-between border-r border-[#1E2128FF] p-5  text-sm">
         <div className="flex flex-col gap-4">{Filters}</div>
         <div className="flex flex-col flex-1 mt-4 relative">
           <AccordionAnimatedItem
@@ -152,7 +152,7 @@ export const SideBar = ({
               handleSetCategory?.("All");
             }}
           />
-          <div className="absolute bottom-20 left-0 w-full mt-4">
+          <div className="absolute bottom-3 left-0 w-full mt-4">
             <button
               onClick={() => handleOpenForm()}
               className="flex items-center justify-center gap-2 px-3 py-2 rounded-md bg-[#262A33] hover:bg-[#4E5668] transition w-full"

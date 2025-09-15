@@ -5,8 +5,8 @@ import taskApi, { Status, Task, TaskFilters } from "@/api/task";
 import { TaskItem } from "./task-item";
 import { TaskForm } from "./form/task-form";
 import { SideBar } from "./side-bar";
-import { Header } from "@/app/components/header";
 import categoryApi, { Category } from "@/api/category";
+import { Menu, PlusCircle } from "lucide-react";
 
 export const PageContent = () => {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -94,16 +94,15 @@ export const PageContent = () => {
   };
 
   return (
-    <div className="w-full h-dvh mx-auto bg-black text-white">
-      <Header
-        handleOpenForm={() => {
-          setTaskId("");
-          setOpenForm(true);
-        }}
-        onToggleSidebar={() => setIsSidebarOpen(true)}
-      />
+    <div className="w-full h-dvh mx-auto bg-black text-white p-0">
+      <button
+        className="md:hidden flex items-center p-2 rounded-md hover:bg-[#262A33FF]"
+        onClick={() => setIsSidebarOpen(true)}
+      >
+        <Menu size={20} />
+      </button>
 
-      <div className="h-full flex items-start">
+      <div className="h-full flex items-start ">
         <SideBar
           isOpen={isSidebarOpen}
           onClose={() => setIsSidebarOpen(false)}
@@ -119,16 +118,25 @@ export const PageContent = () => {
           }}
         />
 
-        <div className="flex-1 h-full mx-auto md:max-w-[60dvw] flex flex-col  gap-5 p-4">
+        <div className="flex-1 h-full mx-auto md:max-w-[60dvw] flex flex-col  gap-5 p-4 pt-10">
           <h2 className="text-2xl font-bold text-white">Tarefas</h2>
 
-          <input
-            type="text"
-            placeholder="Buscar tarefa"
-            className="w-full p-2 rounded-md bg-[#262A33FF] text-white"
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-          />
+          <div className="flex w-full items-center gap-2 mb-4">
+            <input
+              type="text"
+              placeholder="Buscar tarefa"
+              className="w-[60%] flex-1 p-2 rounded-md bg-[#262A33FF] text-white"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+            <button
+              onClick={() => setOpenForm(true)}
+              className="flex items-center  gap-3 px-2 py-2 rounded-md bg-[#262A33FF] hover:bg-[#4E5668FF]"
+            >
+              <PlusCircle size={16} />
+              <span className="hidden sm:inline">Adicionar tarefa</span>
+            </button>
+          </div>
 
           {tasks.length === 0 ? (
             <div className="flex flex-col items-center justify-center  mb-10 md:mb-0 h-full  text-center gap-4 text-gray-400">
